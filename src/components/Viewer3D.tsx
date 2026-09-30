@@ -37,7 +37,9 @@ import type { FilterComponent } from "../types/component";
    CONFIG
 ===================================================== */
 
-const MODEL_URL = "/models/microfiber_filter_v5.glb";
+// BASE_URL keeps this working when the site is hosted under a sub-path
+// (for example GitHub Pages: https://user.github.io/repo-name/).
+const MODEL_URL = `${import.meta.env.BASE_URL}models/microfiber_filter_v5.glb`;
 
 /** The model is scaled so that its largest dimension is this many scene units. */
 const TARGET_SIZE = 4;
