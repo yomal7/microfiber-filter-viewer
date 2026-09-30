@@ -19,6 +19,10 @@ export default function App() {
   const [currentView, setCurrentView] =
     useState("Isometric");
 
+  // 0 = assembled, 1 = fully exploded.
+  const [explodeAmount, setExplodeAmount] =
+    useState(0);
+
   // Increases on every camera button press so the same view can be re-applied.
   const [cameraNonce, setCameraNonce] =
     useState(0);
@@ -129,12 +133,63 @@ export default function App() {
               </span>
             </div>
 
-            {isolatedComponent && (
-              <div className="isolation-badge">
-                ISOLATED:{" "}
-                {isolatedComponent.name}
+            <div className="toolbar-right">
+              <div
+                className={`explode-control ${
+                  isolatedComponent
+                    ? "disabled"
+                    : ""
+                }`}
+              >
+                <span className="toolbar-label">
+                  EXPLODE
+                </span>
+
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={Math.round(
+                    explodeAmount * 100
+                  )}
+                  disabled={
+                    isolatedComponent !== null
+                  }
+                  onChange={(event) =>
+                    setExplodeAmount(
+                      Number(
+                        event.target.value
+                      ) / 100
+                    )
+                  }
+                  aria-label="Exploded view amount"
+                />
+
+                <button
+                  disabled={
+                    isolatedComponent !== null
+                  }
+                  onClick={() =>
+                    setExplodeAmount(
+                      explodeAmount > 0.5
+                        ? 0
+                        : 1
+                    )
+                  }
+                >
+                  {explodeAmount > 0.5
+                    ? "Assemble"
+                    : "Explode"}
+                </button>
               </div>
-            )}
+
+              {isolatedComponent && (
+                <div className="isolation-badge">
+                  ISOLATED:{" "}
+                  {isolatedComponent.name}
+                </div>
+              )}
+            </div>
           </div>
 
           <Viewer3D
@@ -142,6 +197,7 @@ export default function App() {
             isolatedComponent={isolatedComponent}
             cameraView={currentView}
             cameraNonce={cameraNonce}
+            explodeAmount={explodeAmount}
             onSelectComponent={handleSelectFromViewer}
           />
 

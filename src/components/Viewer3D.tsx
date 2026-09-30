@@ -22,17 +22,11 @@ import {
   Color,
   MathUtils,
   MeshStandardMaterial,
-  Sphere,
+  PerspectiveCamera,
   Vector3,
 } from "three";
 
-import type {
-  Group,
-  Intersection,
-  Material,
-  Mesh,
-  PerspectiveCamera,
-} from "three";
+import type { Group, Intersection, Material, Mesh } from "three";
 
 import { components } from "../data/components";
 import { indexModel } from "../utils/ModelMapping";
@@ -70,8 +64,19 @@ interface Viewer3DProps {
   /** false = hide other parts when isolating, true = show them faintly. */
   ghostOthers?: boolean;
 
+  /** 0 = assembled, 1 = fully exploded (animated smoothly). */
+  explodeAmount: number;
+
   /** Called with the clicked component, or null when empty space is clicked. */
   onSelectComponent: (component: FilterComponent | null) => void;
+}
+
+interface ExplodeState {
+  /** the value currently shown (animated) */
+  current: number;
+
+  /** the value we are animating towards */
+  target: number;
 }
 
 interface ModelRegistry {
@@ -154,9 +159,16 @@ export default function Viewer3D({
   cameraView,
   cameraNonce,
   ghostOthers = false,
+  explodeAmount,
   onSelectComponent,
 }: Viewer3DProps) {
   const registryRef = useRef<ModelRegistry | null>(null);
+
+  const explodeRef = useRef<ExplodeState>({ current: 0, target: 0 });
+
+  useEffect(() => {
+    explodeRef.current.target = explodeAmount;
+  }, [explodeAmount]);
 
   return (
     <div className="viewer-wrapper">
@@ -226,11 +238,13 @@ export default function Viewer3D({
             isolatedId={isolatedComponent?.id ?? null}
             ghostOthers={ghostOthers}
             registryRef={registryRef}
+            explodeRef={explodeRef}
             onSelectComponent={onSelectComponent}
           />
 
           <CameraRig
             registryRef={registryRef}
+            explodeRef={explodeRef}
             view={cameraView}
             nonce={cameraNonce}
             isolatedId={isolatedComponent?.id ?? null}
@@ -250,6 +264,7 @@ interface FilterModelProps {
   isolatedId: string | null;
   ghostOthers: boolean;
   registryRef: RegistryHolder;
+  explodeRef: { current: ExplodeState };
   onSelectComponent: (component: FilterComponent | null) => void;
 }
 
@@ -258,6 +273,7 @@ function FilterModel({
   isolatedId,
   ghostOthers,
   registryRef,
+  explodeRef,
   onSelectComponent,
 }: FilterModelProps) {
   const { scene } = useGLTF(MODEL_URL);
@@ -318,13 +334,55 @@ function FilterModel({
       -center.z * scale,
     );
 
-    return {
-      root,
-      scale,
-      position,
-      index: indexModel(root, components),
-    };
+    const index = indexModel(root, components);
+
+    /*
+     * Exploded view data. components.ts stores vectors in FreeCAD space
+     * (mm, Z-up); the GLB is metres, Y-up:  (x, y, z)_cad -> (x, z, -y)_glb.
+     */
+    const explodeItems: { mesh: Mesh; base: Vector3; offset: Vector3 }[] = [];
+
+    index.meshOwner.forEach((owner, mesh) => {
+      const vector = components.find((item) => item.id === owner)?.explodeVector;
+
+      if (!vector) {
+        return;
+      }
+
+      explodeItems.push({
+        mesh,
+        base: mesh.position.clone(),
+        offset: new Vector3(vector.x, vector.z, -vector.y).multiplyScalar(0.001),
+      });
+    });
+
+    return { root, scale, position, index, explodeItems };
   }, [scene]);
+
+  /* Animate the exploded view. */
+  useFrame((_, delta) => {
+    const state = explodeRef.current;
+
+    // Isolating always shows the part assembled.
+    const target = isolatedId ? 0 : state.target;
+    const difference = target - state.current;
+
+    if (Math.abs(difference) < 0.0005) {
+      if (state.current === target) {
+        return;
+      }
+
+      state.current = target;
+    } else {
+      state.current += difference * (1 - Math.exp(-6 * delta));
+    }
+
+    for (const item of prepared.explodeItems) {
+      item.mesh.position
+        .copy(item.base)
+        .addScaledVector(item.offset, state.current);
+    }
+  });
 
   const selectable = useMemo(
     () =>
@@ -494,6 +552,7 @@ useGLTF.preload(MODEL_URL);
 
 interface CameraRigProps {
   registryRef: RegistryHolder;
+  explodeRef: { current: ExplodeState };
   view: string;
   nonce: number;
   isolatedId: string | null;
@@ -504,7 +563,13 @@ interface CameraGoal {
   target: Vector3;
 }
 
-function CameraRig({ registryRef, view, nonce, isolatedId }: CameraRigProps) {
+function CameraRig({
+  registryRef,
+  explodeRef,
+  view,
+  nonce,
+  isolatedId,
+}: CameraRigProps) {
   const camera = useThree((state) => state.camera) as PerspectiveCamera;
 
   const controls = useThree(
@@ -513,6 +578,8 @@ function CameraRig({ registryRef, view, nonce, isolatedId }: CameraRigProps) {
 
   const goal = useRef<CameraGoal | null>(null);
   const initialised = useRef(false);
+  const interacting = useRef(false);
+  const wasExploding = useRef(false);
   const previous = useRef({ view, nonce, isolatedId });
 
   /* Where must the camera be to frame the model (or one component)? */
@@ -541,20 +608,44 @@ function CameraRig({ registryRef, view, nonce, isolatedId }: CameraRigProps) {
         return null;
       }
 
-      const sphere = box.getBoundingSphere(new Sphere());
+      /*
+       * Find the distance at which every corner of the bounding box fits
+       * inside the camera's view for this viewing direction.
+       */
+      const center = box.getCenter(new Vector3());
+      const unit = direction.clone().normalize();
 
-      const verticalFov = MathUtils.degToRad(camera.fov);
-      const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+      const probe = new PerspectiveCamera();
+      probe.position.copy(center).add(unit); // 1 unit away
+      probe.up.set(0, 1, 0);
+      probe.lookAt(center);
+      probe.updateMatrixWorld(true);
 
-      const distance =
-        (sphere.radius / Math.sin(Math.min(verticalFov, horizontalFov) / 2)) *
-        1.25;
+      const tanV = Math.tan(MathUtils.degToRad(camera.fov) / 2);
+      const tanH = tanV * camera.aspect;
+
+      let distance = 0;
+
+      for (let i = 0; i < 8; i++) {
+        const corner = new Vector3(
+          i & 1 ? box.max.x : box.min.x,
+          i & 2 ? box.max.y : box.min.y,
+          i & 4 ? box.max.z : box.min.z,
+        ).applyMatrix4(probe.matrixWorldInverse);
+
+        // corner.z is negative in front of the probe camera.
+        distance = Math.max(
+          distance,
+          1 + Math.abs(corner.x) / tanH + corner.z,
+          1 + Math.abs(corner.y) / tanV + corner.z,
+        );
+      }
+
+      distance *= 1.15;
 
       return {
-        target: sphere.center.clone(),
-        position: sphere.center
-          .clone()
-          .add(direction.clone().normalize().multiplyScalar(distance)),
+        target: center,
+        position: center.clone().add(unit.multiplyScalar(distance)),
       };
     },
     [camera, registryRef],
@@ -613,18 +704,56 @@ function CameraRig({ registryRef, view, nonce, isolatedId }: CameraRigProps) {
 
     const stop = () => {
       goal.current = null;
+      interacting.current = true;
+    };
+
+    const release = () => {
+      interacting.current = false;
     };
 
     controls.addEventListener("start", stop);
+    controls.addEventListener("end", release);
 
-    return () => controls.removeEventListener("start", stop);
+    return () => {
+      controls.removeEventListener("start", stop);
+      controls.removeEventListener("end", release);
+    };
   }, [controls]);
 
   /* Smooth camera animation. */
   useFrame((_, delta) => {
+    if (!controls) {
+      return;
+    }
+
+    /*
+     * While the model is exploding / assembling its size changes, so keep
+     * re-framing it (unless the user is orbiting it).
+     */
+    const explodeTarget = isolatedId ? 0 : explodeRef.current.target;
+    const exploding =
+      Math.abs(explodeTarget - explodeRef.current.current) > 0.0005;
+
+    if (
+      (exploding || wasExploding.current) &&
+      initialised.current &&
+      !interacting.current
+    ) {
+      const fit = computeFit(
+        camera.position.clone().sub(controls.target),
+        isolatedId,
+      );
+
+      if (fit) {
+        goal.current = fit;
+      }
+    }
+
+    wasExploding.current = exploding;
+
     const target = goal.current;
 
-    if (!target || !controls) {
+    if (!target) {
       return;
     }
 

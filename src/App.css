@@ -236,7 +236,8 @@
   background: #526078;
 }
 
-.component-item.selected .component-dot {
+.component-item.selected
+  .component-dot {
   background: #42d9ff;
 }
 
@@ -279,9 +280,15 @@
 
   padding: 0 14px;
 
-  background: rgba(11, 16, 32, 0.85);
+  background: rgba(
+    11,
+    16,
+    32,
+    0.85
+  );
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid
+    rgba(255, 255, 255, 0.05);
 
   backdrop-filter: blur(6px);
 }
@@ -301,6 +308,60 @@
   color: #b7c3d7;
 
   font-size: 11px;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.explode-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.explode-control .toolbar-label {
+  margin-right: 0;
+}
+
+.explode-control input[type="range"] {
+  width: 130px;
+
+  accent-color: #48d9ff;
+
+  cursor: pointer;
+}
+
+.explode-control button {
+  padding: 5px 10px;
+
+  border: 1px solid #263249;
+  border-radius: 5px;
+
+  background: #111827;
+
+  color: #8190a8;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+.explode-control button:hover:not(:disabled) {
+  background: #182236;
+
+  color: #d5dfed;
+}
+
+.explode-control.disabled {
+  opacity: 0.4;
+}
+
+.explode-control.disabled input,
+.explode-control.disabled button {
+  cursor: not-allowed;
 }
 
 .isolation-badge {
@@ -337,7 +398,12 @@
   align-items: center;
   justify-content: center;
 
-  background: rgba(9, 14, 26, 0.92);
+  background: rgba(
+    9,
+    14,
+    26,
+    0.92
+  );
 
   border-top: 1px solid #202a3d;
 
