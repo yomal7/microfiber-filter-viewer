@@ -7,8 +7,6 @@ import ComponentTree from "./components/ComponentTree";
 import DetailsPanel from "./components/DetailsPanel";
 import CameraControls from "./components/CameraControls";
 
-import { components } from "./data/components";
-
 import type { FilterComponent } from "./types/component";
 
 export default function App() {
@@ -18,27 +16,47 @@ export default function App() {
   const [isolatedComponent, setIsolatedComponent] =
     useState<FilterComponent | null>(null);
 
-  const [currentView, setCurrentView] = useState("Isometric");
+  const [currentView, setCurrentView] =
+    useState("Isometric");
 
-  const handleSelectComponent = (component: FilterComponent) => {
+  // Increases on every camera button press so the same view can be re-applied.
+  const [cameraNonce, setCameraNonce] =
+    useState(0);
+
+  const handleSelectComponent = (
+    component: FilterComponent
+  ) => {
     setSelectedComponent(component);
 
     // Selecting another component exits isolation.
     setIsolatedComponent(null);
   };
 
-  const handleSelectObject = (objectName: string) => {
-    const component = components.find((item) =>
-      item.modelObjectNames.includes(objectName),
-    );
-
+  // Called when the 3D model is clicked (component) or empty space is clicked (null).
+  const handleSelectFromViewer = (
+    component: FilterComponent | null
+  ) => {
     if (component) {
       setSelectedComponent(component);
+      return;
+    }
+
+    // While isolating, keep the selection so the "Show All" button stays reachable.
+    if (!isolatedComponent) {
+      setSelectedComponent(null);
     }
   };
 
+  const handleViewChange = (view: string) => {
+    setCurrentView(view);
+    setCameraNonce((n) => n + 1);
+  };
+
   const handleIsolate = () => {
-    if (selectedComponent && selectedComponent.isolatable) {
+    if (
+      selectedComponent &&
+      selectedComponent.isolatable
+    ) {
       setIsolatedComponent(selectedComponent);
     }
   };
@@ -55,17 +73,24 @@ export default function App() {
 
       <header className="topbar">
         <div className="brand">
-          <div className="brand-mark">MF</div>
+          <div className="brand-mark">
+            MF
+          </div>
 
           <div>
-            <h1>Microfiber Filtration System</h1>
+            <h1>
+              Microfiber Filtration System
+            </h1>
 
-            <span>Interactive Engineering Model</span>
+            <span>
+              Interactive Engineering Model
+            </span>
           </div>
         </div>
 
         <div className="status">
           <span className="status-dot" />
+
           MODEL READY
         </div>
       </header>
@@ -75,6 +100,7 @@ export default function App() {
       ====================================================== */}
 
       <main className="main-layout">
+
         {/* ===================================================
             LEFT — COMPONENT TREE
         ==================================================== */}
@@ -91,16 +117,22 @@ export default function App() {
         ==================================================== */}
 
         <section className="viewer-panel">
+
           <div className="viewer-toolbar">
             <div>
-              <span className="toolbar-label">VIEW</span>
+              <span className="toolbar-label">
+                VIEW
+              </span>
 
-              <span className="current-view">{currentView}</span>
+              <span className="current-view">
+                {currentView}
+              </span>
             </div>
 
             {isolatedComponent && (
               <div className="isolation-badge">
-                ISOLATED: {isolatedComponent.name}
+                ISOLATED:{" "}
+                {isolatedComponent.name}
               </div>
             )}
           </div>
@@ -108,14 +140,17 @@ export default function App() {
           <Viewer3D
             selectedComponent={selectedComponent}
             isolatedComponent={isolatedComponent}
-            onSelectObject={handleSelectObject}
+            cameraView={currentView}
+            cameraNonce={cameraNonce}
+            onSelectComponent={handleSelectFromViewer}
           />
 
           {/* CameraControls is now actually used */}
           <CameraControls
             currentView={currentView}
-            onViewChange={setCurrentView}
+            onViewChange={handleViewChange}
           />
+
         </section>
 
         {/* ===================================================
@@ -127,6 +162,7 @@ export default function App() {
           onIsolate={handleIsolate}
           onShowAll={handleShowAll}
         />
+
       </main>
 
       {/* =====================================================
@@ -134,11 +170,17 @@ export default function App() {
       ====================================================== */}
 
       <footer className="footer">
-        <span>Microfiber Filtration System</span>
+        <span>
+          Microfiber Filtration System
+        </span>
 
-        <span>FreeCAD → GLB → React Three.js</span>
+        <span>
+          FreeCAD → GLB → React Three.js
+        </span>
 
-        <span>40 Components</span>
+        <span>
+          40 Components
+        </span>
       </footer>
     </div>
   );
