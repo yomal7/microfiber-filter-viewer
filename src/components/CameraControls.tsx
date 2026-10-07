@@ -5,14 +5,15 @@ interface CameraControlsProps {
   onViewChange: (view: string) => void;
 }
 
+/** value = name Viewer3D understands, label = what the button shows */
 const CAMERA_VIEWS = [
-  "Front",
-  "Rear",
-  "Left",
-  "Right",
-  "Top",
-  "Bottom",
-  "Isometric",
+  { value: "Isometric", label: "3D" },
+  { value: "Front", label: "Front" },
+  { value: "Rear", label: "Back" },
+  { value: "Left", label: "Left" },
+  { value: "Right", label: "Right" },
+  { value: "Top", label: "Top" },
+  { value: "Bottom", label: "Bottom" },
 ];
 
 export default function CameraControls({
@@ -20,25 +21,17 @@ export default function CameraControls({
   onViewChange,
 }: CameraControlsProps) {
   return (
-    <div className="bottom-controls">
-      <div className="camera-buttons">
-        {CAMERA_VIEWS.map((view) => (
-          <button
-            key={view}
-            className={currentView === view ? "active" : ""}
-            onClick={() => onViewChange(view)}
-          >
-            {view}
-          </button>
-        ))}
-
+    <div className="segmented" role="group" aria-label="Camera view">
+      {CAMERA_VIEWS.map((view) => (
         <button
-          className="reset"
-          onClick={() => onViewChange("Isometric")}
+          key={view.value}
+          className={currentView === view.value ? "is-active" : ""}
+          aria-pressed={currentView === view.value}
+          onClick={() => onViewChange(view.value)}
         >
-          Reset
+          {view.label}
         </button>
-      </div>
+      ))}
     </div>
   );
 }

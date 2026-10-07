@@ -1,74 +1,55 @@
 import type { FilterComponent } from "../types/component";
-import { components } from "../data/components";
+import { componentGroups, orderedComponents } from "../data/components";
 
 interface ComponentTreeProps {
   selectedComponent: FilterComponent | null;
   onSelect: (component: FilterComponent) => void;
 }
 
-interface ComponentGroup {
-  title: string;
-  ids: string[];
-}
-
-const GROUPS: ComponentGroup[] = [
-  {
-    title: "Stage 1 Housing",
-    ids: ["stage1-housing", "inlet", "p1", "overflow"],
-  },
-  {
-    title: "Filter Layers",
-    ids: ["coarse-mesh", "rubber-ring", "plastic-ring", "fine-filter", "cloth-straps"],
-  },
-  {
-    title: "Stage 2 Housing",
-    ids: ["stage2-housing", "p2", "outlet", "flow-sensor"],
-  },
-];
-
 export default function ComponentTree({
   selectedComponent,
   onSelect,
 }: ComponentTreeProps) {
   return (
-    <div className="component-tree">
-      {/* HEADER */}
-
-      <div className="panel-title">
-        <span>COMPONENTS</span>
-
-        <span className="component-count">{components.length}</span>
+    <nav className="parts" aria-label="Filter parts">
+      <div className="parts-header">
+        <h2>Parts</h2>
+        <span className="parts-count">{orderedComponents.length}</span>
       </div>
 
-      {/* GROUPS */}
+      {componentGroups.map((group) => (
+        <section className="parts-group" key={group.title}>
+          <h3>{group.title}</h3>
 
-      {GROUPS.map((group) => (
-        <div className="component-group" key={group.title}>
-          <div className="group-title">{group.title}</div>
+          <ul>
+            {group.ids.map((id) => {
+              const index = orderedComponents.findIndex(
+                (item) => item.id === id,
+              );
+              const component = orderedComponents[index];
 
-          {group.ids.map((id) => {
-            const component = components.find((item) => item.id === id);
+              if (!component) {
+                return null;
+              }
 
-            if (!component) {
-              return null;
-            }
+              const isSelected = selectedComponent?.id === component.id;
 
-            const isSelected = selectedComponent?.id === component.id;
-
-            return (
-              <button
-                key={component.id}
-                className={`component-item ${isSelected ? "selected" : ""}`}
-                onClick={() => onSelect(component)}
-              >
-                <span className="component-dot" />
-
-                <span>{component.name}</span>
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <li key={component.id}>
+                  <button
+                    className={`part-item${isSelected ? " is-selected" : ""}`}
+                    aria-current={isSelected ? "true" : undefined}
+                    onClick={() => onSelect(component)}
+                  >
+                    <span className="part-number">{index + 1}</span>
+                    <span className="part-name">{component.name}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       ))}
-    </div>
+    </nav>
   );
 }

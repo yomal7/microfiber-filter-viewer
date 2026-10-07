@@ -44,7 +44,7 @@ const MODEL_URL = `${import.meta.env.BASE_URL}models/microfiber_filter_v7.glb`;
 /** The model is scaled so that its largest dimension is this many scene units. */
 const TARGET_SIZE = 4;
 
-const HIGHLIGHT = new Color("#22d3ee");
+const HIGHLIGHT = new Color("#2f6fd6");
 
 /** Clicking these "sees through" to the parts behind them. */
 const SEE_THROUGH_IDS = new Set(["stage1-housing", "stage2-housing"]);
@@ -180,7 +180,7 @@ export default function Viewer3D({
         gl={{ antialias: true }}
         onPointerMissed={() => onSelectComponent(null)}
       >
-        <color attach="background" args={["#0b1020"]} />
+        <color attach="background" args={["#e8ebef"]} />
 
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 8, 6]} intensity={1.8} />
@@ -216,10 +216,10 @@ export default function Viewer3D({
           args={[20, 20]}
           cellSize={0.25}
           cellThickness={0.6}
-          cellColor="#1b2b4a"
+          cellColor="#d2d7dd"
           sectionSize={1}
           sectionThickness={1}
-          sectionColor="#27406b"
+          sectionColor="#b9c1ca"
           fadeDistance={14}
           fadeStrength={1.5}
           infiniteGrid

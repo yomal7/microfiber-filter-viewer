@@ -1,10 +1,13 @@
-import type { FilterComponent } from "../types/component";
+import type { ComponentGroup, FilterComponent } from "../types/component";
 
 /*
  * Model: microfiber_filter_v7.glb  (two-part screw-together filter)
  *
  * modelObjectNames must match the FreeCAD object names exactly
  * (they become the node names in the GLB).
+ *
+ * specs: dimensions come from microfiber_filter_v7.py. Heights are
+ * measured from the bottom of the Stage 2 housing.
  *
  * explodeVector
  * -------------
@@ -39,9 +42,17 @@ export const components: FilterComponent[] = [
     name: "Stage 1 Housing",
     category: "housing",
     description:
-      "Transparent upper housing, 110 mm outer diameter and 100 mm tall, with a closed top. Internal threads at its open bottom screw onto the Stage 2 housing, and a small ledge inside clamps the coarse mesh.",
+      "Transparent upper housing with a closed top. Internal threads at its open bottom screw onto the Stage 2 housing, and a small ledge inside clamps the coarse mesh.",
     purpose:
       "Receives the wastewater and holds the inlet, pressure sensor P1 and the overflow pipe. Unscrews from Stage 2 for cleaning.",
+    specs: [
+      { label: "Outer diameter", value: "110 mm" },
+      { label: "Inner diameter", value: "102 mm" },
+      { label: "Height", value: "100 mm" },
+      { label: "Wall thickness", value: "4 mm" },
+      { label: "Thread", value: "Internal, 4 mm pitch, 15 mm long" },
+      { label: "Material", value: "Clear polycarbonate or polypropylene" },
+    ],
     modelObjectNames: ["Stage1_Top_Housing"],
     selectable: true,
     isolatable: true,
@@ -53,9 +64,14 @@ export const components: FilterComponent[] = [
     name: "Water Inlet",
     category: "inlet",
     description:
-      "25 mm inlet pipe through a bulkhead fitting in the Stage 1 wall, near the top.",
+      "Inlet pipe through a bulkhead fitting in the Stage 1 wall, near the top.",
     purpose:
       "Brings wastewater from the washing machine drain hose into the filter.",
+    specs: [
+      { label: "Pipe size", value: "25 mm OD / 21 mm ID" },
+      { label: "Height above base", value: "210 mm" },
+      { label: "Fitting", value: "Bulkhead through the wall" },
+    ],
     modelObjectNames: ["Water_Inlet"],
     selectable: true,
     isolatable: true,
@@ -67,9 +83,14 @@ export const components: FilterComponent[] = [
     name: "Pressure Sensor P1",
     category: "sensor",
     description:
-      "Pressure sensor on a G1/4 port in the Stage 1 wall, below the inlet and above the coarse mesh.",
+      "Pressure sensor on a port in the Stage 1 wall, below the inlet and above the coarse mesh.",
     purpose:
       "Measures the upstream pressure before any filtering. P1 minus P2 shows how clogged the filters are.",
+    specs: [
+      { label: "Port", value: "G1/4 bulkhead (13 mm hole)" },
+      { label: "Height above base", value: "180 mm" },
+      { label: "Sensor", value: "0-100 kPa, 0.5-4.5 V output" },
+    ],
     modelObjectNames: ["P1_Pressure_Port", "P1_Pressure_Sensor"],
     selectable: true,
     isolatable: true,
@@ -84,6 +105,11 @@ export const components: FilterComponent[] = [
       "Pipe that leaves through the top of the Stage 1 housing and bends sideways. It is kept separate from the outlet.",
     purpose:
       "Carries water away if Stage 1 backs up, so the washing machine is never blocked. This water is unfiltered, so it never mixes with the filtered outlet. It also lets trapped air escape.",
+    specs: [
+      { label: "Pipe size", value: "20 mm OD / 16 mm ID" },
+      { label: "Rise above lid", value: "25 mm" },
+      { label: "Side run", value: "60 mm" },
+    ],
     modelObjectNames: ["Overflow_Pipe"],
     selectable: true,
     isolatable: true,
@@ -94,12 +120,18 @@ export const components: FilterComponent[] = [
 
   {
     id: "coarse-mesh",
-    name: "Coarse Mesh (Stage 1 Filter)",
+    name: "Coarse Mesh",
     category: "stage",
     description:
-      "316 stainless steel woven mesh disc, 98 mm across, with roughly 300-500 micron openings. The wire grid is shown at display scale.",
+      "Stainless steel woven mesh disc at the threaded joint. The wire grid in the model is drawn at display scale.",
     purpose:
       "First filter stage. Catches lint and large fibres so the fine filter does not clog early. Washable and reusable.",
+    specs: [
+      { label: "Diameter", value: "98 mm" },
+      { label: "Aperture", value: "About 300-500 µm" },
+      { label: "Material", value: "316 stainless steel" },
+      { label: "Filter stage", value: "Stage 1 (coarse)" },
+    ],
     modelObjectNames: ["Coarse_Mesh_Disc"],
     selectable: true,
     isolatable: true,
@@ -111,9 +143,14 @@ export const components: FilterComponent[] = [
     name: "Rubber Sealing Ring",
     category: "seal",
     description:
-      "Flat EPDM gasket, 98 mm across, sitting under the coarse mesh at the threaded joint.",
+      "Flat gasket sitting under the coarse mesh at the threaded joint.",
     purpose:
       "Compressed when the two housings are screwed together, so water cannot leak out at the joint.",
+    specs: [
+      { label: "Size", value: "98 mm OD / 84 mm ID" },
+      { label: "Thickness", value: "3 mm" },
+      { label: "Material", value: "EPDM rubber" },
+    ],
     modelObjectNames: ["Rubber_Sealing_Ring"],
     selectable: true,
     isolatable: true,
@@ -128,6 +165,10 @@ export const components: FilterComponent[] = [
       "Plastic ring with a flange that rests on the Stage 2 rim and a short collar below it.",
     purpose:
       "Carries the fine-fibre bucket: the bucket's rim is fixed to the collar, which keeps its mouth open.",
+    specs: [
+      { label: "Flange", value: "98 mm OD / 84 mm ID, 3 mm thick" },
+      { label: "Collar", value: "88 mm OD / 82 mm ID, 8 mm tall" },
+    ],
     modelObjectNames: ["Plastic_Support_Ring"],
     selectable: true,
     isolatable: true,
@@ -136,12 +177,18 @@ export const components: FilterComponent[] = [
 
   {
     id: "fine-filter",
-    name: "Fine-Fibre Filter (Stage 2 Filter)",
+    name: "Fine-Fibre Filter",
     category: "stage",
     description:
-      "Bucket-shaped bag of fine fibre media (about 50-100 micron, alkali-treated luffa or PP) hanging inside the Stage 2 housing, with a gap around and below it.",
+      "Bucket-shaped bag of fine fibre media hanging inside the Stage 2 housing, with a gap around and below it for filtered water.",
     purpose:
       "Second filter stage. Captures the smaller microfibres that pass the coarse mesh.",
+    specs: [
+      { label: "Size", value: "82 mm diameter, 102 mm deep" },
+      { label: "Rating", value: "About 50-100 µm" },
+      { label: "Media", value: "Alkali-treated luffa or PP fibre" },
+      { label: "Filter stage", value: "Stage 2 (fine)" },
+    ],
     modelObjectNames: ["Fine_Fibre_Basket"],
     selectable: true,
     isolatable: true,
@@ -156,6 +203,10 @@ export const components: FilterComponent[] = [
       "Two cloth straps fixed to opposite sides of the plastic ring, crossing under the bucket like gift ribbon.",
     purpose:
       "Hold the bucket's shape so it does not sag or balloon out under water pressure.",
+    specs: [
+      { label: "Count", value: "2, crossed at 90°" },
+      { label: "Width", value: "12 mm" },
+    ],
     modelObjectNames: ["Cloth_Strap_1", "Cloth_Strap_2"],
     selectable: true,
     isolatable: true,
@@ -169,9 +220,17 @@ export const components: FilterComponent[] = [
     name: "Stage 2 Housing",
     category: "housing",
     description:
-      "Narrower transparent lower housing, 98.5 mm outer diameter and 150 mm tall, with external threads at the top. Its domed floor is raised in the centre and lowest at the outer rim.",
+      "Narrower transparent lower housing with external threads at the top. Its domed floor is raised in the centre and lowest at the outer rim.",
     purpose:
       "Holds the fine-fibre filter and collects the filtered water. The domed floor guides water to the wall and out of the outlet, so the housing drains completely.",
+    specs: [
+      { label: "Outer diameter", value: "98.5 mm" },
+      { label: "Inner diameter", value: "90.5 mm" },
+      { label: "Height", value: "150 mm" },
+      { label: "Dome height", value: "15 mm" },
+      { label: "Thread", value: "External, 4 mm pitch, 15 mm long" },
+      { label: "Material", value: "Clear polycarbonate or polypropylene" },
+    ],
     modelObjectNames: ["Stage2_Bottom_Housing"],
     selectable: true,
     isolatable: true,
@@ -183,9 +242,14 @@ export const components: FilterComponent[] = [
     name: "Pressure Sensor P2",
     category: "sensor",
     description:
-      "Pressure sensor on a G1/4 port in the Stage 2 wall, opposite the outlet, in the gap between the domed floor and the filter bucket.",
+      "Pressure sensor on a port in the Stage 2 wall, opposite the outlet, in the gap between the domed floor and the filter bucket.",
     purpose:
       "Measures the downstream (filtered) pressure. P1 minus P2 is the pressure drop used to detect clogging.",
+    specs: [
+      { label: "Port", value: "G1/4 bulkhead (13 mm hole)" },
+      { label: "Height above base", value: "28 mm" },
+      { label: "Sensor", value: "0-100 kPa, 0.5-4.5 V output" },
+    ],
     modelObjectNames: ["P2_Pressure_Port", "P2_Pressure_Sensor"],
     selectable: true,
     isolatable: true,
@@ -197,9 +261,13 @@ export const components: FilterComponent[] = [
     name: "Outlet",
     category: "outlet",
     description:
-      "20 mm outlet pipe leaving the Stage 2 wall at the rim of the domed floor. The bottom of its bore is level with the lowest point of the floor.",
-    purpose:
-      "Carries the filtered water to the drain.",
+      "Outlet pipe leaving the Stage 2 wall at the rim of the domed floor. The bottom of its bore is level with the lowest point of the floor.",
+    purpose: "Carries the filtered water to the drain.",
+    specs: [
+      { label: "Pipe size", value: "20 mm OD / 16 mm ID" },
+      { label: "Centre height", value: "13 mm above base" },
+      { label: "Bore bottom", value: "Level with floor rim (5 mm)" },
+    ],
     modelObjectNames: ["Outlet_Pipe", "Final_Outlet"],
     selectable: true,
     isolatable: true,
@@ -214,9 +282,54 @@ export const components: FilterComponent[] = [
       "In-line hall-effect flow sensor on the outlet pipe, with its bore matched to the pipe.",
     purpose:
       "Measures the flow rate. Pressure drop rises with flow on its own, so flow is needed to compare readings fairly.",
+    specs: [
+      { label: "Type", value: "Hall-effect turbine" },
+      { label: "Body", value: "32 mm OD, 40 mm long" },
+      { label: "Bore", value: "16 mm (matches the pipe)" },
+    ],
     modelObjectNames: ["Flow_Rate_Sensor"],
     selectable: true,
     isolatable: true,
     explodeVector: { x: 0, y: 0, z: STAGE2_Z },
   },
 ];
+
+/** Sidebar groups. Their order is also the order of the part walkthrough. */
+export const componentGroups: ComponentGroup[] = [
+  {
+    title: "Stage 1 housing",
+    ids: ["stage1-housing", "inlet", "p1", "overflow"],
+  },
+  {
+    title: "Filter layers",
+    ids: [
+      "coarse-mesh",
+      "rubber-ring",
+      "plastic-ring",
+      "fine-filter",
+      "cloth-straps",
+    ],
+  },
+  {
+    title: "Stage 2 housing",
+    ids: ["stage2-housing", "p2", "outlet", "flow-sensor"],
+  },
+];
+
+/** All components in walkthrough order (top of the filter to the bottom). */
+export const orderedComponents: FilterComponent[] = componentGroups
+  .flatMap((group) => group.ids)
+  .map((id) => components.find((item) => item.id === id))
+  .filter((item): item is FilterComponent => item !== undefined);
+
+export const categoryLabels: Record<FilterComponent["category"], string> = {
+  housing: "Housing",
+  stage: "Filter stage",
+  sensor: "Sensor",
+  inlet: "Inlet",
+  outlet: "Outlet",
+  overflow: "Overflow",
+  seal: "Seal",
+  support: "Support",
+  other: "Other",
+};
