@@ -39,7 +39,7 @@ import type { FilterComponent } from "../types/component";
 
 // BASE_URL keeps this working when the site is hosted under a sub-path
 // (for example GitHub Pages: https://user.github.io/repo-name/).
-const MODEL_URL = `${import.meta.env.BASE_URL}models/microfiber_filter_v5.glb`;
+const MODEL_URL = `${import.meta.env.BASE_URL}models/microfiber_filter_v7.glb`;
 
 /** The model is scaled so that its largest dimension is this many scene units. */
 const TARGET_SIZE = 4;
@@ -47,7 +47,7 @@ const TARGET_SIZE = 4;
 const HIGHLIGHT = new Color("#22d3ee");
 
 /** Clicking these "sees through" to the parts behind them. */
-const SEE_THROUGH_IDS = new Set(["housing"]);
+const SEE_THROUGH_IDS = new Set(["stage1-housing", "stage2-housing"]);
 
 /* =====================================================
    TYPES

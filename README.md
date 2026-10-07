@@ -5,7 +5,8 @@ An interactive 3D viewer for a microfiber filtration system model. The model was
 ## Features
 
 - Interactive 3D model with orbit, pan and zoom
-- Component tree to browse the filter parts (housing, filtration stages, sensors, inlet, outlet, drain, vent, etc.)
+- Component tree to browse the filter parts (Stage 1 and Stage 2 housings, coarse mesh, rubber ring, fine-fibre filter, sensors, inlet, outlet and overflow)
+- Exploded view that separates the two-part screw-together filter into its layers
 - Click a part in the tree or directly in the 3D view to select it
 - Details panel showing each component's description and purpose
 - Isolate a selected component and show all parts again

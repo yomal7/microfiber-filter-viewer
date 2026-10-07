@@ -13,28 +13,16 @@ interface ComponentGroup {
 
 const GROUPS: ComponentGroup[] = [
   {
-    title: "Housing",
-    ids: ["housing"],
+    title: "Stage 1 Housing",
+    ids: ["stage1-housing", "inlet", "p1", "overflow"],
   },
   {
-    title: "Filtration Stages",
-    ids: ["stage1", "stage2"],
+    title: "Filter Layers",
+    ids: ["coarse-mesh", "rubber-ring", "plastic-ring", "fine-filter", "cloth-straps"],
   },
   {
-    title: "Pressure Sensors",
-    ids: ["p1", "p2", "spare"],
-  },
-  {
-    title: "Flow System",
-    ids: ["inlet", "bypass", "outlet"],
-  },
-  {
-    title: "Instrumentation",
-    ids: ["flow-sensor"],
-  },
-  {
-    title: "Maintenance",
-    ids: ["drain", "vent"],
+    title: "Stage 2 Housing",
+    ids: ["stage2-housing", "p2", "outlet", "flow-sensor"],
   },
 ];
 
