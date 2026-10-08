@@ -1,6 +1,6 @@
 {
   "description": "CFD runs for the viewer's Simulation mode",
-  "mesh": "coarse",
+  "mesh": "normal",
   "runs": [
     {
       "case": "q05p0_c00",
