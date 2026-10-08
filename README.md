@@ -11,6 +11,9 @@ An interactive 3D viewer for a microfiber filtration system model. The model was
 - Details panel showing each component's description and purpose
 - Isolate a selected component and show all parts again
 - Camera presets: Front, Rear, Left, Right, Top, Bottom and Isometric
+- **Flow simulation mode**: water particles moving through the filter along
+  real OpenFOAM flow paths, for 5 flow rates × 3 clogging levels, with the
+  20 × 4 LCD readings, a filter status light and where the water goes
 
 ## Tech Stack
 
@@ -41,13 +44,18 @@ Then open the local URL printed in the terminal.
 ## Project Structure
 
 ```
-public/models/            GLB model of the filter
+public/models/            GLB model of the filter (microfiber_filter_v8.glb)
+public/simulation/        OpenFOAM results for the Flow simulation mode
 src/
   components/
     Viewer3D.tsx          3D canvas, model loading, selection and isolation
     ComponentTree.tsx     Left panel: list of components
     DetailsPanel.tsx      Right panel: component details and isolate actions
     CameraControls.tsx    Camera preset buttons
+    FlowParticles.tsx     Animated water particles (Flow simulation)
+    SimulationPanel.tsx   Left panel in Flow simulation: flow, clogging, playback
+    SimulationReadout.tsx Right panel in Flow simulation: LCD, status, flows
+  utils/simulationData.ts Loads and prepares the simulation files
   data/components.ts      Component definitions mapped to model objects
   types/component.ts      Shared TypeScript types
   App.tsx                 Main layout and state
@@ -56,3 +64,17 @@ src/
 ## Adding or Editing Components
 
 Component information lives in [src/data/components.ts](src/data/components.ts). Each entry links a component to one or more object names in the GLB model through `modelObjectNames`.
+
+## Updating the Flow simulation data
+
+The files in `public/simulation/` come from the
+[microfiber-filter-cfd](https://github.com/yomal7/microfiber-filter-cfd) repo.
+After its GitHub Actions run finishes, copy its `results/viewer/` folder here:
+
+```bash
+rm -rf public/simulation
+cp -r ../microfiber-filter-cfd/results/viewer public/simulation
+```
+
+Positions in those files are in FreeCAD millimetres (Z up); the viewer
+converts them to the GLB axes, so the particles line up with the model.

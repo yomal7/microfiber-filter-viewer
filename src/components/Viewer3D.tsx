@@ -29,6 +29,8 @@ import {
 import type { Group, Intersection, Material, Mesh } from "three";
 
 import { components } from "../data/components";
+import FlowParticles from "./FlowParticles";
+import type { PreparedRun } from "../types/simulation";
 import { indexModel } from "../utils/ModelMapping";
 
 import type { FilterComponent } from "../types/component";
@@ -39,7 +41,7 @@ import type { FilterComponent } from "../types/component";
 
 // BASE_URL keeps this working when the site is hosted under a sub-path
 // (for example GitHub Pages: https://user.github.io/repo-name/).
-const MODEL_URL = `${import.meta.env.BASE_URL}models/microfiber_filter_v7.glb`;
+const MODEL_URL = `${import.meta.env.BASE_URL}models/microfiber_filter_v8.glb`;
 
 /** The model is scaled so that its largest dimension is this many scene units. */
 const TARGET_SIZE = 4;
@@ -48,6 +50,31 @@ const HIGHLIGHT = new Color("#2f6fd6");
 
 /** Clicking these "sees through" to the parts behind them. */
 const SEE_THROUGH_IDS = new Set(["stage1-housing", "stage2-housing"]);
+
+/**
+ * In the flow simulation, parts that would hide the water are faded
+ * (maximum opacity per component).
+ */
+const SIMULATION_FADE: Record<string, number> = {
+  "stage1-housing": 0.12,
+  "stage2-housing": 0.12,
+  inlet: 0.3,
+  overflow: 0.3,
+  outlet: 0.3,
+  "flow-sensor": 0.35,
+  "fine-filter": 0.14,
+  "cloth-straps": 0.25,
+  "plastic-ring": 0.45,
+  "rubber-ring": 0.5,
+};
+
+/** What the flow simulation needs from the app. */
+export interface SimulationView {
+  run: PreparedRun | null;
+  playing: boolean;
+  speed: number;
+  showPaths: boolean;
+}
 
 /* =====================================================
    TYPES
@@ -71,6 +98,9 @@ interface Viewer3DProps {
 
   /** Called with the clicked component, or null when empty space is clicked. */
   onSelectComponent: (component: FilterComponent | null) => void;
+
+  /** Set while the "Flow simulation" mode is on. */
+  simulation?: SimulationView | null;
 }
 
 interface ExplodeState {
@@ -163,14 +193,16 @@ export default function Viewer3D({
   ghostOthers = false,
   explodeAmount,
   onSelectComponent,
+  simulation = null,
 }: Viewer3DProps) {
   const registryRef = useRef<ModelRegistry | null>(null);
 
   const explodeRef = useRef<ExplodeState>({ current: 0, target: 0 });
 
+  // The flow simulation always shows the filter assembled.
   useEffect(() => {
-    explodeRef.current.target = explodeAmount;
-  }, [explodeAmount]);
+    explodeRef.current.target = simulation ? 0 : explodeAmount;
+  }, [explodeAmount, simulation]);
 
   return (
     <div className="viewer-wrapper">
@@ -178,7 +210,11 @@ export default function Viewer3D({
         dpr={[1, 2]}
         camera={{ fov: 40, near: 0.01, far: 200, position: [4, 3, 6] }}
         gl={{ antialias: true }}
-        onPointerMissed={() => onSelectComponent(null)}
+        onPointerMissed={() => {
+          if (!simulation) {
+            onSelectComponent(null);
+          }
+        }}
       >
         <color attach="background" args={["#e8ebef"]} />
 
@@ -242,6 +278,7 @@ export default function Viewer3D({
             registryRef={registryRef}
             explodeRef={explodeRef}
             onSelectComponent={onSelectComponent}
+            simulation={simulation}
           />
 
           <CameraRig
@@ -268,6 +305,7 @@ interface FilterModelProps {
   registryRef: RegistryHolder;
   explodeRef: { current: ExplodeState };
   onSelectComponent: (component: FilterComponent | null) => void;
+  simulation: SimulationView | null;
 }
 
 function FilterModel({
@@ -277,7 +315,9 @@ function FilterModel({
   registryRef,
   explodeRef,
   onSelectComponent,
+  simulation,
 }: FilterModelProps) {
+  const simulating = simulation !== null;
   const { scene } = useGLTF(MODEL_URL);
 
   const groupRef = useRef<Group>(null);
@@ -441,8 +481,11 @@ function FilterModel({
 
       mesh.visible = inScope || ghostOthers;
 
+      const fade =
+        simulating && owner !== null ? SIMULATION_FADE[owner] : undefined;
+
       const highlight =
-        ghost || owner === null
+        simulating || ghost || owner === null
           ? 0
           : owner === selectedId
             ? 1
@@ -463,6 +506,10 @@ function FilterModel({
           material.transparent = true;
           material.opacity = Math.min(original.opacity, 0.08);
           material.depthWrite = false;
+        } else if (fade !== undefined) {
+          material.transparent = true;
+          material.opacity = Math.min(original.opacity, fade);
+          material.depthWrite = false;
         } else {
           material.transparent = original.transparent;
           material.opacity = original.opacity;
@@ -482,7 +529,7 @@ function FilterModel({
         material.needsUpdate = true;
       });
     });
-  }, [prepared, selectedId, isolatedId, hoveredId, ghostOthers]);
+  }, [prepared, selectedId, isolatedId, hoveredId, ghostOthers, simulating]);
 
   useEffect(() => {
     document.body.style.cursor = hoveredId ? "pointer" : "auto";
@@ -532,15 +579,27 @@ function FilterModel({
       position={prepared.position}
       onClick={(event) => {
         event.stopPropagation();
-        onSelectComponent(toComponent(pick(event.intersections)));
+        if (!simulating) {
+          onSelectComponent(toComponent(pick(event.intersections)));
+        }
       }}
       onPointerMove={(event) => {
         event.stopPropagation();
-        setHoveredId(pick(event.intersections));
+        setHoveredId(simulating ? null : pick(event.intersections));
       }}
       onPointerOut={() => setHoveredId(null)}
     >
       <primitive object={prepared.root} />
+
+      {simulation?.run && (
+        <FlowParticles
+          run={simulation.run}
+          playing={simulation.playing}
+          speed={simulation.speed}
+          showPaths={simulation.showPaths}
+          worldScale={prepared.scale}
+        />
+      )}
     </group>
   );
 }

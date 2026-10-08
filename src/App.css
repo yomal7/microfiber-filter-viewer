@@ -527,6 +527,216 @@ button {
 }
 
 /* =====================================================
+   MODE SWITCH (top bar)
+===================================================== */
+
+.mode-switch button {
+  padding: 8px 16px;
+  font-size: 15px;
+}
+
+/* =====================================================
+   FLOW SIMULATION: left panel
+===================================================== */
+
+.sim-intro {
+  padding: 0 10px 6px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.sim-field {
+  padding: 14px 10px 4px;
+}
+
+.sim-field h3,
+.sim-legend h3 {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.segmented-wide {
+  display: flex;
+  width: 100%;
+}
+
+.segmented-wide button {
+  flex: 1;
+  padding: 7px 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sim-unit {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-subtle);
+}
+
+.sim-playback {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.sim-playback .segmented button {
+  padding: 6px 9px;
+}
+
+.sim-play {
+  min-width: 76px;
+  padding: 7px 12px;
+}
+
+.sim-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 10px 0;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.sim-check input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent);
+}
+
+.sim-legend {
+  margin: 20px 10px 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.sim-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.sim-legend-row + .sim-legend-row {
+  margin-top: 8px;
+}
+
+.sim-ramp {
+  flex: none;
+  width: 44px;
+  height: 10px;
+  border-radius: 5px;
+}
+
+.sim-ramp-blue {
+  background: linear-gradient(90deg, #8fc0ea, #0b3d91);
+}
+
+.sim-ramp-orange {
+  background: linear-gradient(90deg, #f6b26b, #c2410c);
+}
+
+.sim-source {
+  margin: 18px 10px 0;
+  font-size: 13px;
+  color: var(--text-subtle);
+}
+
+/* =====================================================
+   FLOW SIMULATION: right panel (LCD + status)
+===================================================== */
+
+.lcd {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 10px solid #1f2a20;
+  border-radius: 10px;
+  background: #2f55d4;
+  box-shadow: inset 0 0 0 1px #2448b8, inset 0 0 18px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.6;
+  color: #f2f6ff;
+  white-space: pre;
+  overflow-x: auto;
+  transition: opacity 150ms ease;
+}
+
+.lcd.is-loading {
+  opacity: 0.55;
+}
+
+.lcd-caption {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-subtle);
+}
+
+.status {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+.status strong {
+  font-size: 15px;
+}
+
+.status p {
+  margin-top: 2px;
+  color: var(--text-muted);
+}
+
+.status-dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+  border-radius: 50%;
+}
+
+.status-ok {
+  background: #effaf3;
+  border-color: #b9e4c9;
+}
+
+.status-ok .status-dot {
+  background: #1f9d55;
+}
+
+.status-warn {
+  background: #fff8e6;
+  border-color: #f3d9a0;
+}
+
+.status-warn .status-dot {
+  background: #d98e04;
+}
+
+.status-alert {
+  background: #fdeeee;
+  border-color: #f2c1c1;
+}
+
+.status-alert .status-dot {
+  background: #d93636;
+}
+
+.sim-notes {
+  padding-left: 20px;
+  font-size: 15px;
+}
+
+.sim-notes li + li {
+  margin-top: 6px;
+}
+
+/* =====================================================
    SMALLER SCREENS (laptops / projectors at 1280-1366 px)
 ===================================================== */
 

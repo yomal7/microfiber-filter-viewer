@@ -1,12 +1,12 @@
 import type { ComponentGroup, FilterComponent } from "../types/component";
 
 /*
- * Model: microfiber_filter_v7.glb  (two-part screw-together filter)
+ * Model: microfiber_filter_v8.glb  (two-part screw-together filter, 20 mm outlet)
  *
  * modelObjectNames must match the FreeCAD object names exactly
  * (they become the node names in the GLB).
  *
- * specs: dimensions come from microfiber_filter_v7.py. Heights are
+ * specs: dimensions come from microfiber_filter_v8.py. Heights are
  * measured from the bottom of the Stage 2 housing.
  *
  * explodeVector
@@ -15,7 +15,7 @@ import type { ComponentGroup, FilterComponent } from "../types/component";
  * (millimetres, Z is up, X is right, -Y is the front of the model).
  * The viewer converts this to the GLB's Y-up metre space automatically.
  *
- * The values match EXPLODE_OFFSETS in microfiber_filter_v7.py, so the web
+ * The values match EXPLODE_OFFSETS in microfiber_filter_v8.py, so the web
  * exploded view looks the same as set_exploded(True) in FreeCAD:
  *
  *   Stage 2 housing (+ P2, outlet, flow sensor)   z =   0
@@ -264,8 +264,8 @@ export const components: FilterComponent[] = [
       "Outlet pipe leaving the Stage 2 wall at the rim of the domed floor. The bottom of its bore is level with the lowest point of the floor.",
     purpose: "Carries the filtered water to the drain.",
     specs: [
-      { label: "Pipe size", value: "20 mm OD / 16 mm ID" },
-      { label: "Centre height", value: "13 mm above base" },
+      { label: "Pipe size", value: "24 mm OD / 20 mm ID" },
+      { label: "Centre height", value: "15 mm above base" },
       { label: "Bore bottom", value: "Level with floor rim (5 mm)" },
     ],
     modelObjectNames: ["Outlet_Pipe", "Final_Outlet"],
@@ -279,13 +279,14 @@ export const components: FilterComponent[] = [
     name: "Flow Rate Sensor",
     category: "sensor",
     description:
-      "In-line hall-effect flow sensor on the outlet pipe, with its bore matched to the pipe.",
+      "YF-B6 brass hall-effect flow sensor on the outlet pipe, with G3/4 threads to match the 20 mm pipe.",
     purpose:
       "Measures the flow rate. Pressure drop rises with flow on its own, so flow is needed to compare readings fairly.",
     specs: [
-      { label: "Type", value: "Hall-effect turbine" },
-      { label: "Body", value: "32 mm OD, 40 mm long" },
-      { label: "Bore", value: "16 mm (matches the pipe)" },
+      { label: "Model", value: "YF-B6, G3/4 brass" },
+      { label: "Range", value: "1–30 L/min, ±3 %" },
+      { label: "Signal", value: "Pulses: Hz = 6.6 × L/min" },
+      { label: "Body (model)", value: "34 mm OD, 60 mm long" },
     ],
     modelObjectNames: ["Flow_Rate_Sensor"],
     selectable: true,

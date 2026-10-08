@@ -68,6 +68,10 @@ export default function DetailsPanel({
               <dd>50-100 µm fibre media</dd>
             </div>
             <div>
+              <dt>Outlet</dt>
+              <dd>20 mm bore, YF-B6 flow sensor</dd>
+            </div>
+            <div>
               <dt>Sensors</dt>
               <dd>P1, P2 and flow rate</dd>
             </div>
